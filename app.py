@@ -57,5 +57,10 @@ while True:
 print(status_list)
 print(times)
 
+for i in range(0, len(times), 2):
+    df=df.append({'start': times[i], 'end': times[i+1]}, ignore_index=True)
+
+df.to_csv('Times.csv')
+
 video_captured.release()
 cv2.destroyAllWindows()
