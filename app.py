@@ -1,6 +1,10 @@
-import cv2, time
+import cv2, time, pandas
+from datetime import datetime
 
 first_frame = None
+status_list=[None, None]
+times = []
+df = pandas.DataFrame(columns=['start', 'end'])
 
 video_captured=cv2.VideoCapture(0)
 
@@ -8,8 +12,9 @@ while True:
     check, frame = video_captured.read()
     status=0
     gray=cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-
     gray=cv2.GaussianBlur(gray,(21,21), 0)
+
+
     # see if first frame is None if it is true which it is in first iteration then loop witll continue but in second iteration the loop will go to line 15.. becaue firs_frame is not None
 
     if first_frame is None:
@@ -26,10 +31,18 @@ while True:
         if cv2.contourArea(contour) < 10000:
             continue
         status=1
+
         (x,y,w,h) = cv2.boundingRect(contour)
         cv2.rectangle(frame,(x,y),(x+w, y+h), (0, 255,0), 3)
 
+    status_list.append(status)
+    if status_list[-1] == 1 and status_list[-2] == 0:
+        times.append(datetime.now())
+    if status_list[-1] == 0 and status_list[-2] == 1:
+        times.append(datetime.now())
     
+
+
     cv2.imshow('capture', gray)
     cv2.imshow('delta_frame', delta_frame)
     cv2.imshow('thesh_delta', thesh_frame)
@@ -38,8 +51,11 @@ while True:
 
     key=cv2.waitKey(1)
     if key==ord('q'):
+        if status==1:
+            times.append(datetime.now())
         break
-    print(status)
+print(status_list)
+print(times)
 
 video_captured.release()
 cv2.destroyAllWindows()
